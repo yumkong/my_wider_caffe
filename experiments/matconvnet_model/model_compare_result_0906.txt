@@ -1,0 +1,111 @@
+ Caffe: |finetuned param - raw param|
+conv1_1_b param difference: 0.00000
+conv1_1_w param difference: 0.00000
+conv1_2_b param difference: 0.00000
+conv1_2_w param difference: 0.00000
+conv2_1_b param difference: 0.00000
+conv2_1_w param difference: 0.00000
+conv2_2_b param difference: 0.00000
+conv2_2_w param difference: 0.00000
+conv3_1_b param difference: 0.55025
+conv3_1_w param difference: 197.90073
+conv3_2_b param difference: 0.63349
+conv3_2_w param difference: 274.67230
+conv3_3_b param difference: 0.59227
+conv3_3_w param difference: 270.65210
+conv4_1_b param difference: 0.82405
+conv4_1_w param difference: 518.59552
+conv4_2_b param difference: 0.85109
+conv4_2_w param difference: 833.89618
+conv4_3_b param difference: 1.13637
+conv4_3_w param difference: 791.80518
+conv5_1_b param difference: 2.15210
+conv5_1_w param difference: 830.81677
+conv5_2_b param difference: 3.28968
+conv5_2_w param difference: 782.33618
+conv5_3_b param difference: 4.36387
+conv5_3_w param difference: 600.89185
+
+ MatConvNet: |finetuned param - raw param|
+param name: conv1_1f, square diff: 3.895
+param name: conv1_1b, square diff: 0.433
+param name: conv1_2f, square diff: 14.996
+param name: conv1_2b, square diff: 0.229
+param name: conv2_1f, square diff: 22.170
+param name: conv2_1b, square diff: 0.231
+param name: conv2_2f, square diff: 33.239
+param name: conv2_2b, square diff: 0.254
+param name: conv3_1f, square diff: 51.416
+param name: conv3_1b, square diff: 0.189
+param name: conv3_2f, square diff: 74.877
+param name: conv3_2b, square diff: 0.218
+param name: conv3_3f, square diff: 77.056
+param name: conv3_3b, square diff: 0.203
+param name: conv4_1f, square diff: 127.939
+param name: conv4_1b, square diff: 0.283
+param name: conv4_2f, square diff: 201.908
+param name: conv4_2b, square diff: 0.292
+param name: conv4_3f, square diff: 209.645
+param name: conv4_3b, square diff: 0.391
+param name: conv5_1f, square diff: 232.989
+param name: conv5_1b, square diff: 0.744
+param name: conv5_2f, square diff: 240.977
+param name: conv5_2b, square diff: 1.135
+param name: conv5_3f, square diff: 226.692
+param name: conv5_3b, square diff: 1.511
+
+ |matconvnet raw param - caffe raw param|
+conv1_1_b param difference: 0.00000
+conv1_1_w param difference: 0.00000
+conv1_2_b param difference: 0.00000
+conv1_2_w param difference: 0.00000
+conv2_1_b param difference: 0.00000
+conv2_1_w param difference: 0.00000
+conv2_2_b param difference: 0.00000
+conv2_2_w param difference: 0.00000
+conv3_1_b param difference: 0.00000
+conv3_1_w param difference: 0.00000
+conv3_2_b param difference: 0.00000
+conv3_2_w param difference: 0.00000
+conv3_3_b param difference: 0.00000
+conv3_3_w param difference: 0.00000
+conv4_1_b param difference: 0.00000
+conv4_1_w param difference: 0.00000
+conv4_2_b param difference: 0.00000
+conv4_2_w param difference: 0.00000
+conv4_3_b param difference: 0.00000
+conv4_3_w param difference: 0.00000
+conv5_1_b param difference: 0.00000
+conv5_1_w param difference: 0.00000
+conv5_2_b param difference: 0.00000
+conv5_2_w param difference: 0.00000
+conv5_3_b param difference: 0.00000
+conv5_3_w param difference: 0.00000
+
+ |matconvnet finetuned param - caffe finetuned param|
+conv1_1_b param difference: 0.43253
+conv1_1_w param difference: 3.89541
+conv1_2_b param difference: 0.22943
+conv1_2_w param difference: 14.99627
+conv2_1_b param difference: 0.23071
+conv2_1_w param difference: 22.16982
+conv2_2_b param difference: 0.25436
+conv2_2_w param difference: 33.23868
+conv3_1_b param difference: 0.36154
+conv3_1_w param difference: 185.34566
+conv3_2_b param difference: 0.41558
+conv3_2_w param difference: 254.69196
+conv3_3_b param difference: 0.38881
+conv3_3_w param difference: 249.55449
+conv4_1_b param difference: 0.54096
+conv4_1_w param difference: 485.27780
+conv4_2_b param difference: 0.55913
+conv4_2_w param difference: 783.92816
+conv4_3_b param difference: 0.74577
+conv4_3_w param difference: 730.93677
+conv5_1_b param difference: 1.40829
+conv5_1_w param difference: 750.40515
+conv5_2_b param difference: 2.15474
+conv5_2_w param difference: 686.47607
+conv5_3_b param difference: 2.85324
+conv5_3_w param difference: 474.63831

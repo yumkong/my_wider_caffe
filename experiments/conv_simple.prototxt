@@ -1,0 +1,48 @@
+name: "convolution"
+
+input: "data"
+input_dim: 1
+input_dim: 3
+input_dim: 3
+input_dim: 3
+
+input: "label"
+input_dim: 1 
+input_dim: 1
+input_dim: 1
+input_dim: 1
+
+layer {
+	bottom: "data"
+	top: "conv"
+	name: "conv"
+	type: "Convolution"
+	param {
+		lr_mult: 1.0
+	}
+	param {
+		lr_mult: 1.0
+	}
+	convolution_param {
+		num_output: 1
+		pad: 0
+		kernel_size: 3
+		stride: 1
+		weight_filler {
+		 type: "gaussian"
+		 std: 1
+		}
+		bias_filler {
+		 type: "constant"
+		 value: 0
+		}
+	}
+}
+
+layer {
+	bottom: "conv"
+	bottom: "label"
+	top: "loss"
+	name: "loss"
+	type: "EuclideanLoss"
+}
