@@ -9,7 +9,7 @@ function conf = proposal_config_widerface(varargin)
     ip = inputParser;
     
     %% training
-    ip.addParamValue('use_gpu',         false, ...      %  gpuDeviceCount > 0 --> false    
+    ip.addParamValue('use_gpu',         gpuDeviceCount > 0, ...      %  false    
                                                         @islogical);
                                     
     % whether drop the anchors that has edges outside of the image boundary
@@ -41,7 +41,7 @@ function conf = proposal_config_widerface(varargin)
     ip.addParamValue('use_flipped',     true,           @islogical);
     % Stride in input image pixels at ROI pooling level (network specific)
     % 16 is true for {Alex,Caffe}Net, VGG_CNN_M_1024, and VGG16
-    ip.addParamValue('feat_stride',     16,             @isscalar);
+    ip.addParamValue('feat_stride',     16,             @isscalar); 
     % train proposal target only to labled ground-truths or also include
     % other proposal results (selective search, etc.)
     ip.addParamValue('target_only_gt',  true,           @islogical);

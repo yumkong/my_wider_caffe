@@ -1,4 +1,4 @@
-function [output_width_map, output_height_map] = proposal_calc_output_size(conf, test_net_def_file)
+function [output_width_map, output_height_map] = proposal_calc_output_size(conf, test_net_def_file, output_map_save_name)
 % [output_width_map, output_height_map] = proposal_calc_output_size(conf, test_net_def_file)
 % --------------------------------------------------------
 % Faster R-CNN
@@ -8,17 +8,18 @@ function [output_width_map, output_height_map] = proposal_calc_output_size(conf,
 
 %     caffe.init_log(fullfile(pwd, 'caffe_log'));
     %0805 added
-    cache_output_width_map = 'output_width_map_vgg16.mat';
-    cache_output_height_map = 'output_height_map_vgg16.mat';
+    %cache_output_width_map = 'output_width_map_vgg16.mat';
+    %cache_output_height_map = 'output_height_map_vgg16.mat';
     try
-        load(cache_output_width_map);
-        load(cache_output_height_map);
+        %load(cache_output_width_map);
+        %load(cache_output_height_map);
+        load(output_map_save_name);  %output_width_map, output_height_map
     catch
 
         caffe_net = caffe.Net(test_net_def_file, 'test');
 
          % set gpu/cpu
-        if 0%conf.use_gpu
+        if conf.use_gpu
             caffe.set_mode_gpu();
         else
             caffe.set_mode_cpu();
@@ -45,9 +46,10 @@ function [output_width_map, output_height_map] = proposal_calc_output_size(conf,
         output_width_map = containers.Map(input, output_w);
         output_height_map = containers.Map(input, output_h);
         %0805
-        save(cache_output_width_map, 'output_width_map', '-v7.3');
-        save(cache_output_height_map, 'output_height_map', '-v7.3');
-
+        %save(cache_output_width_map, 'output_width_map', '-v7.3');
+        %save(cache_output_height_map, 'output_height_map', '-v7.3');
+        %0925
+        save(output_map_save_name, 'output_width_map', 'output_height_map');
         caffe.reset_all(); 
     end
 end
