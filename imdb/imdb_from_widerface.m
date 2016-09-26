@@ -5,16 +5,20 @@ switch image_set
     case {'trainval'}
         %cache_imdb = fullfile(cache_dir, 'train_imdb_e1-e3_raw.mat');  %imdb
         %cache_roidb = fullfile(cache_dir, 'train_roidb_e1-e3_raw.mat');  %roidb
-        cache_imdb = fullfile(cache_dir, 'train_imdb_all_raw.mat');  %imdb
-        cache_roidb = fullfile(cache_dir, 'train_roidb_all_raw.mat');  %roidb
+        %cache_imdb = fullfile(cache_dir, 'train_imdb_all_raw.mat');  %imdb
+        %cache_roidb = fullfile(cache_dir, 'train_roidb_all_raw.mat');  %roidb
+        cache_imdb = fullfile(cache_dir, 'train_imdb_ZF_e1-e3_raw.mat');  %imdb
+        cache_roidb = fullfile(cache_dir, 'train_roidb_ZF_e1-e3_raw.mat');  %roidb
         devpath = fullfile('WIDER_train','images');
         doc_dir = fullfile('wider_face_split','wider_face_train');
         name = 'WIDERFACE_train';
     case {'test'}
         %cache_imdb = fullfile(cache_dir, 'test_imdb_e1-e3_raw.mat');  %imdb
         %cache_roidb = fullfile(cache_dir, 'test_roidb_e1-e3_raw.mat');  %roidb
-        cache_imdb = fullfile(cache_dir, 'test_imdb_all_raw.mat');  %imdb
-        cache_roidb = fullfile(cache_dir, 'test_roidb_all_raw.mat');  %roidb
+        %cache_imdb = fullfile(cache_dir, 'test_imdb_all_raw.mat');  %imdb
+        %cache_roidb = fullfile(cache_dir, 'test_roidb_all_raw.mat');  %roidb
+        cache_imdb = fullfile(cache_dir, 'test_imdb_ZF_e1-e3_raw.mat');  %imdb
+        cache_roidb = fullfile(cache_dir, 'test_roidb_ZF_e1-e3_raw.mat');  %roidb
         devpath = fullfile('WIDER_val','images');
         doc_dir = fullfile('wider_face_split','wider_face_val');
         name = 'WIDERFACE_test';

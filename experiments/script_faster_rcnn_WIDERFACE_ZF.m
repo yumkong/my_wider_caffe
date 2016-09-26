@@ -24,13 +24,14 @@ opts.do_val                 = true;
 % model
 model                       = Model.ZF_for_Faster_RCNN_VOC2007;
 % cache base
-cache_base_proposal         = 'faster_rcnn_WIDERFACE_ZF';
+cache_base_proposal         = 'faster_rcnn_WIDERFACE_ZF_e1-e3';
 cache_base_fast_rcnn        = '';
 % train/test data
 dataset                     = [];
-use_flipped                 = false;
-dataset                     = Dataset.widerface_all(dataset, 'train', use_flipped);
-dataset                     = Dataset.widerface_all(dataset, 'test', false);
+use_flipped                 = false;  %true --> false
+event_num = 3; %-1
+dataset                     = Dataset.widerface_all(dataset, 'train', use_flipped, event_num);
+dataset                     = Dataset.widerface_all(dataset, 'test', false, event_num);
 
 %0805 added, make sure imdb_train and roidb_train are of cell type
 if ~iscell(dataset.imdb_train)
@@ -55,11 +56,11 @@ fprintf('\n***************\nstage one proposal \n***************\n');
 model.stage1_rpn            = Faster_RCNN_Train.do_proposal_train(conf_proposal, dataset, model.stage1_rpn, opts.do_val);
 % test
 %0903 added
-test_file_suffix = '_val_ZF_eventAll';
-test_save_dir = 'val_ZF_eventAll_res';
-%dataset.roidb_train        	= cellfun(@(x, y) Faster_RCNN_Train.do_proposal_test(conf_proposal, model.stage1_rpn, x, y), dataset.imdb_train, dataset.roidb_train, 'UniformOutput', false);
-%dataset.roidb_test        	= Faster_RCNN_Train.do_proposal_test(conf_proposal, model.stage1_rpn, dataset.imdb_test, dataset.roidb_test);
-dataset.roidb_test        	= Faster_RCNN_Train.do_proposal_test(conf_proposal, model.stage1_rpn, dataset.imdb_test, dataset.roidb_test,test_file_suffix, test_save_dir);
+% test_file_suffix = '_val_ZF_eventAll';
+% test_save_dir = 'val_ZF_eventAll_res';
+% %dataset.roidb_train        	= cellfun(@(x, y) Faster_RCNN_Train.do_proposal_test(conf_proposal, model.stage1_rpn, x, y), dataset.imdb_train, dataset.roidb_train, 'UniformOutput', false);
+% %dataset.roidb_test        	= Faster_RCNN_Train.do_proposal_test(conf_proposal, model.stage1_rpn, dataset.imdb_test, dataset.roidb_test);
+% dataset.roidb_test        	= Faster_RCNN_Train.do_proposal_test(conf_proposal, model.stage1_rpn, dataset.imdb_test, dataset.roidb_test,test_file_suffix, test_save_dir);
 % liu@0816 masked --> not necessary currently
 % %%  stage one fast rcnn
 % fprintf('\n***************\nstage one fast rcnn\n***************\n');
@@ -96,8 +97,7 @@ dataset.roidb_test        	= Faster_RCNN_Train.do_proposal_test(conf_proposal, m
 end
 
 function [anchors, output_width_map, output_height_map] = proposal_prepare_anchors(conf, cache_name, test_net_def_file)
-    [output_width_map, output_height_map] ...                           
-                                = proposal_calc_output_size(conf, test_net_def_file);
-    anchors                = proposal_generate_anchors(cache_name, ...
-                                    'scales',  2.^[-1:5]);  %0807:2.^[3:5] --> 2.^[0:5] --> 2.^[-1:5]
+    output_map_save_name = fullfile('cache_data', 'output_map_ZF.mat');
+    [output_width_map, output_height_map] = proposal_calc_output_size(conf, test_net_def_file, output_map_save_name);
+    anchors = proposal_generate_anchors(cache_name, 'scales',  2.^[-1:5]);%0820:2.^[3:5] -->  2.^[-1:5]
 end
