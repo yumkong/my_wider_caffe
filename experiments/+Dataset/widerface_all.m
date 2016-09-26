@@ -10,6 +10,10 @@ elseif isunix
     devkit = '/usr/local/data/yuguang/dataset/wider_face';
 end
 
+cache_dir = 'output_vgg16_conv4';
+mkdir_if_missing(cache_dir);
+
+
 cache_dir = 'cache_data';
 mkdir_if_missing(cache_dir);
     

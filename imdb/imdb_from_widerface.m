@@ -3,16 +3,16 @@ function [imdb, roidb] = imdb_from_widerface(root_dir, image_set, flip, cache_di
 
 switch image_set
     case {'trainval'}
-        cache_imdb = fullfile(cache_dir, 'train_imdb_e1-e3.mat');  %imdb 
-        cache_roidb = fullfile(cache_dir, 'train_roidb_e1-e3.mat');  %roidb
-        devpath = fullfile('WIDER_train', 'images');
-        doc_dir = fullfile('wider_face_split', 'wider_face_train');
+        cache_imdb = fullfile(cache_dir, 'train_imdb_e1-e3_raw.mat');  %imdb
+        cache_roidb = fullfile(cache_dir, 'train_roidb_e1-e3_raw.mat');  %roidb
+        devpath = fullfile('WIDER_train','images');
+        doc_dir = fullfile('wider_face_split','wider_face_train');
         name = 'WIDERFACE_train';
     case {'test'}
-        cache_imdb = fullfile(cache_dir, 'test_imdb_e1-e3.mat');  %imdb 
-        cache_roidb = fullfile(cache_dir, 'test_roidb_e1-e3.mat');  %roidb
-        devpath = fullfile('WIDER_val', 'images');
-        doc_dir = fullfile('wider_face_split', 'wider_face_val');
+        cache_imdb = fullfile(cache_dir, 'test_imdb_e1-e3_raw.mat');  %imdb
+        cache_roidb = fullfile(cache_dir, 'test_roidb_e1-e3_raw.mat');  %roidb
+        devpath = fullfile('WIDER_val','images');
+        doc_dir = fullfile('wider_face_split','wider_face_val');
         name = 'WIDERFACE_test';
     otherwise
         error('usage = ''trainval'' or ''test''');
