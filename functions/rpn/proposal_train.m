@@ -33,7 +33,9 @@ function save_model_path = proposal_train(conf, imdb_train, roidb_train, varargi
     
 %% try to find trained model
     imdbs_name = cell2mat(cellfun(@(x) x.name, imdb_train, 'UniformOutput', false));
-    cache_dir = fullfile(pwd, 'output', 'rpn_cachedir', opts.cache_name, imdbs_name);
+    %cache_dir = fullfile(pwd, 'output', 'rpn_cachedir', opts.cache_name, imdbs_name);
+    cache_dir = fullfile(pwd, 'cache_data', opts.cache_name, imdbs_name);
+    mkdir_if_missing(cache_dir);
     save_model_path = fullfile(cache_dir, 'final');
     if exist(save_model_path, 'file')
         return;
@@ -41,9 +43,10 @@ function save_model_path = proposal_train(conf, imdb_train, roidb_train, varargi
     
 %% init  
     % init caffe solver
-    imdbs_name = cell2mat(cellfun(@(x) x.name, imdb_train, 'UniformOutput', false));
-    cache_dir = fullfile(pwd, 'output', 'rpn_cachedir', opts.cache_name, imdbs_name);
-    mkdir_if_missing(cache_dir);
+    % 0925: commented, seem to be duplicated with above
+    %imdbs_name = cell2mat(cellfun(@(x) x.name, imdb_train, 'UniformOutput', false));
+    %cache_dir = fullfile(pwd, 'output', 'rpn_cachedir', opts.cache_name, imdbs_name);
+    %mkdir_if_missing(cache_dir);
     caffe_log_file_base = fullfile(cache_dir, 'caffe_log');
     caffe.init_log(caffe_log_file_base);
     %0806 added: restore from a snapshot
@@ -52,24 +55,26 @@ function save_model_path = proposal_train(conf, imdb_train, roidb_train, varargi
     caffe_solver = caffe.Solver(opts.solver_def_file);
     %caffe_solver.restore(snapshotfile);
     caffe_solver.net.copy_from(opts.net_file);
-    try
-        load('param_cell.mat');
-        caffe_solver.net.params('conv_proposal1',1).set_data(param_cell{1});
-        caffe_solver.net.params('conv_proposal1',2).set_data(param_cell{2});
-        caffe_solver.net.params('proposal_cls_score',1).set_data(param_cell{3});
-        caffe_solver.net.params('proposal_cls_score',2).set_data(param_cell{4});
-        caffe_solver.net.params('proposal_bbox_pred',1).set_data(param_cell{5});
-        caffe_solver.net.params('proposal_bbox_pred',2).set_data(param_cell{6});
-    catch
-        param_cell = {};
-        param_cell{1} = caffe_solver.net.params('conv_proposal1',1).get_data();
-        param_cell{2} = caffe_solver.net.params('conv_proposal1',2).get_data();
-        param_cell{3} = caffe_solver.net.params('proposal_cls_score',1).get_data();
-        param_cell{4} = caffe_solver.net.params('proposal_cls_score',2).get_data();
-        param_cell{5} = caffe_solver.net.params('proposal_bbox_pred',1).get_data();
-        param_cell{6} = caffe_solver.net.params('proposal_bbox_pred',2).get_data();
-        save('param_cell.mat','param_cell');
-    end
+    %0925 commented, previously used to debug: initilize the last 3 conv
+    %layers with exactly the same weights and biases 
+%     try
+%         load('param_cell.mat');
+%         caffe_solver.net.params('conv_proposal1',1).set_data(param_cell{1});
+%         caffe_solver.net.params('conv_proposal1',2).set_data(param_cell{2});
+%         caffe_solver.net.params('proposal_cls_score',1).set_data(param_cell{3});
+%         caffe_solver.net.params('proposal_cls_score',2).set_data(param_cell{4});
+%         caffe_solver.net.params('proposal_bbox_pred',1).set_data(param_cell{5});
+%         caffe_solver.net.params('proposal_bbox_pred',2).set_data(param_cell{6});
+%     catch
+%         param_cell = {};
+%         param_cell{1} = caffe_solver.net.params('conv_proposal1',1).get_data();
+%         param_cell{2} = caffe_solver.net.params('conv_proposal1',2).get_data();
+%         param_cell{3} = caffe_solver.net.params('proposal_cls_score',1).get_data();
+%         param_cell{4} = caffe_solver.net.params('proposal_cls_score',2).get_data();
+%         param_cell{5} = caffe_solver.net.params('proposal_bbox_pred',1).get_data();
+%         param_cell{6} = caffe_solver.net.params('proposal_bbox_pred',2).get_data();
+%         save('param_cell.mat','param_cell');
+%     end
     % init log
     timestamp = datestr(datevec(now()), 'yyyymmdd_HHMMSS');
     mkdir_if_missing(fullfile(cache_dir, 'log'));
@@ -94,23 +99,26 @@ function save_model_path = proposal_train(conf, imdb_train, roidb_train, varargi
     
 %% making tran/val data
     fprintf('Preparing training data...');
+    train_roi_name = fullfile(cache_dir, 'train_input_roidb_e1-e3.mat');
+    test_roi_name = fullfile(cache_dir, 'test_input_roidb_e1-e3.mat');
     try
-        load('output\train_roidb_event123.mat');
+        %load('output\train_roidb_event123.mat');
+        load(train_roi_name);
     catch
         [image_roidb_train, bbox_means, bbox_stds]...
                             = proposal_prepare_image_roidb(conf, opts.imdb_train, opts.roidb_train);
-        save('output\train_roidb_event123.mat', 'image_roidb_train','bbox_means', 'bbox_stds');
+        save(train_roi_name, 'image_roidb_train','bbox_means', 'bbox_stds');
     end
     fprintf('Done.\n');
     
     if opts.do_val
         fprintf('Preparing validation data...');
         try
-            load('output\val_roidb_event123.mat');
+            load(test_roi_name);
         catch
             [image_roidb_val]...
                                 = proposal_prepare_image_roidb(conf, opts.imdb_val, opts.roidb_val, bbox_means, bbox_stds);
-            save('output\val_roidb_event123.mat', 'image_roidb_val');
+            save(test_roi_name, 'image_roidb_val');
         end
         fprintf('Done.\n');
 
@@ -149,17 +157,19 @@ function save_model_path = proposal_train(conf, imdb_train, roidb_train, varargi
     while (iter_ < max_iter)
         
         caffe_solver.net.set_phase('train');
-        fprintf('Network param sum of absolute difference for iteration %d: \n', iter_);
-        model_compare(caffe_solver.net, sprintf('matconvnet_model\\iter_%d.mat', iter_));
+        %fprintf('Network param sum of absolute difference for iteration %d: \n', iter_);
+        %model_compare(caffe_solver.net, sprintf('matconvnet_model\\iter_%d.mat', iter_));
         
         % generate minibatch training data
         % liu@0907 masked for debugging
-        sub_db_inds = mod(iter_, length(image_roidb_train))+1;  % get data in order
+        %sub_db_inds = mod(iter_, length(image_roidb_train))+1;  % get data in order
         %if sub_db_inds == 0
         %    sub_db_inds = length(image_roidb_train);  % the last image index
         %end
-        %fprintf('Train iter %d, image number: %d\n', iter_, sub_db_inds);
-        %[shuffled_inds, sub_db_inds] = generate_random_minibatch(shuffled_inds, image_roidb_train, conf.ims_per_batch);        
+        %
+        [shuffled_inds, sub_db_inds] = generate_random_minibatch(shuffled_inds, image_roidb_train, conf.ims_per_batch);  
+        %fprintf('Train iter %d, Image number %d\n', iter_, sub_db_inds);
+        
         [net_inputs, scale_inds] = proposal_generate_minibatch_fun(conf, image_roidb_train(sub_db_inds));
         
         % visual_debug_fun(conf, image_roidb_train(sub_db_inds), net_inputs, bbox_means, bbox_stds, conf.classes, scale_inds);
@@ -181,7 +191,7 @@ function save_model_path = proposal_train(conf, imdb_train, roidb_train, varargi
         format long
         fprintf('Iter %d, Image %d: ', iter_, sub_db_inds);
         for kkk = 1:length(rst)
-            fprintf('%s = %.10f, ',rst(kkk).blob_name, rst(kkk).data); 
+            fprintf('%s = %.4f, ',rst(kkk).blob_name, rst(kkk).data); 
         end
         fprintf('\n');
         

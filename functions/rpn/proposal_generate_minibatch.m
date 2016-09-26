@@ -7,11 +7,11 @@ function [input_blobs, random_scale_inds] = proposal_generate_minibatch(conf, im
 % --------------------------------------------------------
     debug_flag = true;
     % ========add random seed=======
-    if debug_flag
-        rng_seed = 6;
-        prev_rng = rng;
-        rng(rng_seed, 'twister');
-    end
+%     if debug_flag
+%         rng_seed = 6;
+%         prev_rng = rng;
+%         rng(rng_seed, 'twister');
+%     end
     % =============================
     num_images = length(image_roidb);
     assert(num_images == 1, 'proposal_generate_minibatch_fcn only support num_images == 1');
@@ -69,9 +69,9 @@ function [input_blobs, random_scale_inds] = proposal_generate_minibatch(conf, im
     input_blobs = {im_blob, labels_blob, label_weights_blob, bbox_targets_blob, bbox_loss_blob};
     
     % ======= recover random seed=======
-    if debug_flag
-        rng(prev_rng);
-    end
+%     if debug_flag
+%         rng(prev_rng);
+%     end
     % =============================
 end
 

@@ -13,6 +13,7 @@ output/*
 models/*
 experiments/output*
 experiments/models/*
+experiments/cache_data/*
 
 # Windows image file caches
 Thumbs.db

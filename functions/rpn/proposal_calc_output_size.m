@@ -8,8 +8,8 @@ function [output_width_map, output_height_map] = proposal_calc_output_size(conf,
 
 %     caffe.init_log(fullfile(pwd, 'caffe_log'));
     %0805 added
-    cache_output_width_map = 'output_width_map_vgg16.mat';
-    cache_output_height_map = 'output_height_map_vgg16.mat';
+    cache_output_width_map = fullfile('cache_data', 'output_width_map_vgg16.mat');
+    cache_output_height_map = fullfile('cache_data', 'output_height_map_vgg16.mat');
     try
         load(cache_output_width_map);
         load(cache_output_height_map);

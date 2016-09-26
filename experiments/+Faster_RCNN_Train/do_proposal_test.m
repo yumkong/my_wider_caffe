@@ -14,6 +14,7 @@ function roidb_new = do_proposal_test(conf, model_stage, imdb, roidb, file_suffi
     end
     %liu@0818 added:
     hit_rate = save_bbox_result(aboxes, imdb, roidb, res_dir);
+    fprintf('Average hit rate of %d test images is %.4f\n', length(hit_rate), mean(hit_rate));
     hit_rate_save_name = ['hit_rate' file_suffix '.mat'];
 	save(hit_rate_save_name, 'hit_rate');
     roidb_regions               = make_roidb_regions(aboxes, imdb.image_ids);  

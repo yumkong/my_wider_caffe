@@ -1,20 +1,18 @@
-function [imdb, roidb] = imdb_from_widerface(root_dir, image_set, flip)
+function [imdb, roidb] = imdb_from_widerface(root_dir, image_set, flip, cache_dir)
 %function imdb_from_widerface(devkit, 'trainval', use_flip)
 
 switch image_set
     case {'trainval'}
-        %cache_imdb = 'output\cache_train_imdb_event123.mat';  %imdb (== image database)
-        %cache_roidb = 'output\cache_train_roidb_event123.mat';  %roidb (== roi database)
-        cache_imdb = 'output\cache_train_imdb_event123_debug.mat';  %imdb (== image database)
-        cache_roidb = 'output\cache_train_roidb_event123_debug.mat';  %roidb (== roi database)
-        devpath = 'WIDER_train\images';
-        doc_dir = 'wider_face_split\wider_face_train';
+        cache_imdb = fullfile(cache_dir, 'train_imdb_e1-e3.mat');  %imdb 
+        cache_roidb = fullfile(cache_dir, 'train_roidb_e1-e3.mat');  %roidb
+        devpath = fullfile('WIDER_train', 'images');
+        doc_dir = fullfile('wider_face_split', 'wider_face_train');
         name = 'WIDERFACE_train';
     case {'test'}
-        cache_imdb = 'output\cache_test_imdb_event123.mat';  %imdb (== image database)
-        cache_roidb = 'output\cache_test_roidb_event123.mat';  %roidb (== roi database)
-        devpath = 'WIDER_val\images';
-        doc_dir = 'wider_face_split\wider_face_val';
+        cache_imdb = fullfile(cache_dir, 'test_imdb_e1-e3.mat');  %imdb 
+        cache_roidb = fullfile(cache_dir, 'test_roidb_e1-e3.mat');  %roidb
+        devpath = fullfile('WIDER_val', 'images');
+        doc_dir = fullfile('wider_face_split', 'wider_face_val');
         name = 'WIDERFACE_test';
     otherwise
         error('usage = ''trainval'' or ''test''');

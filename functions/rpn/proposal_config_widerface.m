@@ -9,7 +9,7 @@ function conf = proposal_config_widerface(varargin)
     ip = inputParser;
     
     %% training
-    ip.addParamValue('use_gpu',         false, ...      %  gpuDeviceCount > 0 --> false    
+    ip.addParamValue('use_gpu',         gpuDeviceCount > 0, ...      % set false in VN7 duo to out of gpu memory    
                                                         @islogical);
                                     
     % whether drop the anchors that has edges outside of the image boundary
