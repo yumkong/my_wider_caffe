@@ -1,4 +1,4 @@
-function script_faster_rcnn_WIDERFACE_VGG16_conv4()
+function script_faster_rcnn_WIDERFACE_VGG16_allevent()
 % script_faster_rcnn_VOC2007_VGG16()
 % Faster rcnn training and testing with VGG16 model
 % --------------------------------------------------------
@@ -24,16 +24,16 @@ active_caffe_mex(opts.gpu_id, opts.caffe_version);
 % do validation, or not 
 opts.do_val                 = true; 
 % model
-%model                       = Model.VGG16_for_Faster_RCNN_WIDERFACE;
-model                       = Model.VGG16_for_Faster_RCNN_WIDERFACE_conv4;
+model                       = Model.VGG16_for_Faster_RCNN_WIDERFACE;
 % cache base
-cache_base_proposal         = 'faster_rcnn_WIDERFACE_vgg_16layers_conv4';
+cache_base_proposal         = 'faster_rcnn_WIDERFACE_vgg_16layers_allevent';
 cache_base_fast_rcnn        = '';
 % train/test data
 dataset                     = [];
 use_flipped                 = false;  %true --> false
-dataset                     = Dataset.widerface_all(dataset, 'train', use_flipped);
-dataset                     = Dataset.widerface_all(dataset, 'test', false);
+event_num = -1; %3
+dataset                     = Dataset.widerface_all(dataset, 'train', use_flipped, event_num);
+dataset                     = Dataset.widerface_all(dataset, 'test', false, event_num);
 
 %0805 added, make sure imdb_train and roidb_train are of cell type
 if ~iscell(dataset.imdb_train)
@@ -59,12 +59,12 @@ fprintf('\n***************\nstage one proposal \n***************\n');
 % train
 model.stage1_rpn            = Faster_RCNN_Train.do_proposal_train(conf_proposal, dataset, model.stage1_rpn, opts.do_val);
 % test
-% train_file_suffix = '_train_vgg16_event3';
-% train_save_dir = 'train_vgg16_event3_res';
-% test_file_suffix = '_val_vgg16_event3';
-% test_save_dir = 'val_vgg16_event3_res';
-% %dataset.roidb_train         = cellfun(@(x, y) Faster_RCNN_Train.do_proposal_test(conf_proposal, model.stage1_rpn, x, y, train_file_suffix, train_save_dir), dataset.imdb_train, dataset.roidb_train, 'UniformOutput', false);
-% dataset.roidb_test       	= Faster_RCNN_Train.do_proposal_test(conf_proposal, model.stage1_rpn, dataset.imdb_test, dataset.roidb_test, test_file_suffix, test_save_dir);
+%train_file_suffix = '_train_vgg16_event3';
+%train_save_dir = 'train_vgg16_event3_res';
+%test_file_suffix = '_val_vgg16_event3';
+%test_save_dir = 'val_vgg16_event3_res';
+%dataset.roidb_train         = cellfun(@(x, y) Faster_RCNN_Train.do_proposal_test(conf_proposal, model.stage1_rpn, x, y, train_file_suffix, train_save_dir), dataset.imdb_train, dataset.roidb_train, 'UniformOutput', false);
+%dataset.roidb_test       	= Faster_RCNN_Train.do_proposal_test(conf_proposal, model.stage1_rpn, dataset.imdb_test, dataset.roidb_test, test_file_suffix, test_save_dir);
 
 % liu@0816 masked --> not necessary currently
 % %%  stage one fast rcnn
@@ -102,7 +102,9 @@ model.stage1_rpn            = Faster_RCNN_Train.do_proposal_train(conf_proposal,
 end
 
 function [anchors, output_width_map, output_height_map] = proposal_prepare_anchors(conf, cache_name, test_net_def_file)
-    output_map_save_name = fullfile('cache_data', 'output_map_conv4.mat');
-    [output_width_map, output_height_map] = proposal_calc_output_size(conf, test_net_def_file, output_map_save_name);
-    anchors = proposal_generate_anchors(cache_name, 'scales',  2.^[-1:5]);%0820:2.^[3:5] -->  2.^[-1:5]
+    output_map_save_name = fullfile('cache_data', 'output_map_conv5.mat');
+    [output_width_map, output_height_map] ...                           
+                                = proposal_calc_output_size(conf, test_net_def_file, output_map_save_name);
+    anchors                = proposal_generate_anchors(cache_name, ...
+                                    'scales',  2.^[-1:5]);%0820:2.^[3:5] -->  2.^[-1:5]
 end

@@ -32,7 +32,8 @@ function [output_width_map, output_height_map] = proposal_calc_output_size(conf,
         for i = 1:length(input)
             fprintf('calulating input size %d / %d\n',i,conf.max_size);
             s = input(i);
-            im_blob = single(zeros(s, s, 3, 1));
+            %im_blob = single(zeros(s, s, 3, 1));
+            im_blob = single(zeros(s, 500, 3, 1));
             net_inputs = {im_blob};
 
             % Reshape net's input blobs
@@ -41,7 +42,8 @@ function [output_width_map, output_height_map] = proposal_calc_output_size(conf,
 
             cls_score = caffe_net.blobs('proposal_cls_score').get_data();
             output_w(i) = size(cls_score, 1);
-            output_h(i) = size(cls_score, 2);
+            output_h(i) = size(cls_score, 1);
+            %output_h(i) = size(cls_score, 2);
         end
 
         output_width_map = containers.Map(input, output_w);

@@ -1,16 +1,20 @@
-function [imdb, roidb] = imdb_from_widerface(root_dir, image_set, flip, cache_dir)
+function [imdb, roidb] = imdb_from_widerface(root_dir, image_set, flip, cache_dir, event_num)
 %function imdb_from_widerface(devkit, 'trainval', use_flip)
 
 switch image_set
     case {'trainval'}
-        cache_imdb = fullfile(cache_dir, 'train_imdb_e1-e3_raw.mat');  %imdb
-        cache_roidb = fullfile(cache_dir, 'train_roidb_e1-e3_raw.mat');  %roidb
+        %cache_imdb = fullfile(cache_dir, 'train_imdb_e1-e3_raw.mat');  %imdb
+        %cache_roidb = fullfile(cache_dir, 'train_roidb_e1-e3_raw.mat');  %roidb
+        cache_imdb = fullfile(cache_dir, 'train_imdb_all_raw.mat');  %imdb
+        cache_roidb = fullfile(cache_dir, 'train_roidb_all_raw.mat');  %roidb
         devpath = fullfile('WIDER_train','images');
         doc_dir = fullfile('wider_face_split','wider_face_train');
         name = 'WIDERFACE_train';
     case {'test'}
-        cache_imdb = fullfile(cache_dir, 'test_imdb_e1-e3_raw.mat');  %imdb
-        cache_roidb = fullfile(cache_dir, 'test_roidb_e1-e3_raw.mat');  %roidb
+        %cache_imdb = fullfile(cache_dir, 'test_imdb_e1-e3_raw.mat');  %imdb
+        %cache_roidb = fullfile(cache_dir, 'test_roidb_e1-e3_raw.mat');  %roidb
+        cache_imdb = fullfile(cache_dir, 'test_imdb_all_raw.mat');  %imdb
+        cache_roidb = fullfile(cache_dir, 'test_roidb_all_raw.mat');  %roidb
         devpath = fullfile('WIDER_val','images');
         doc_dir = fullfile('wider_face_split','wider_face_val');
         name = 'WIDERFACE_test';
@@ -35,9 +39,13 @@ catch
     annodoc = load(fullfile(rootdir, doc_dir));
 
     imgsum_ = 0;
-    eventNum = numel(annodoc.file_list);
+    if event_num <= 0
+        eventNum = numel(annodoc.file_list);  % use all events
+    else
+        eventNum = event_num;  % use the first N events
+    end
     % ###########################################
-    for eventIter = 1:3  %eventNum
+    for eventIter = 1:eventNum
        imgsum_ = imgsum_ + numel(annodoc.file_list{eventIter});
     end
 
@@ -51,7 +59,7 @@ catch
     % crop the faces of the first ten events, and save the results
     %0807 changed to smaller dataset for faster training and debug
     % ###########################################
-    for eventIter = 1:3  %eventNum
+    for eventIter = 1:eventNum
        event_ = annodoc.event_list{eventIter};
        images_ = annodoc.file_list{eventIter};
        boxes_ = annodoc.face_bbx_list{eventIter};

@@ -99,8 +99,8 @@ function save_model_path = proposal_train(conf, imdb_train, roidb_train, varargi
     
 %% making tran/val data
     fprintf('Preparing training data...');
-    train_roi_name = fullfile(cache_dir, 'train_input_roidb_e1-e3.mat');
-    test_roi_name = fullfile(cache_dir, 'test_input_roidb_e1-e3.mat');
+    train_roi_name = fullfile(cache_dir, 'train_input_roidb_all.mat');
+    test_roi_name = fullfile(cache_dir, 'test_input_roidb_all.mat');
     try
         %load('output\train_roidb_event123.mat');
         load(train_roi_name);
@@ -130,7 +130,7 @@ function save_model_path = proposal_train(conf, imdb_train, roidb_train, varargi
     conf.classes        = opts.imdb_train{1}.classes;
     
 %%  try to train/val with images which have maximum size potentially, to validate whether the gpu memory is enough  
-    %check_gpu_memory(conf, caffe_solver, opts.do_val);
+    check_gpu_memory(conf, caffe_solver, opts.do_val);
      
 %% -------------------- Training -------------------- 
 

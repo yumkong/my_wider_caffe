@@ -59,12 +59,12 @@ fprintf('\n***************\nstage one proposal \n***************\n');
 % train
 model.stage1_rpn            = Faster_RCNN_Train.do_proposal_train(conf_proposal, dataset, model.stage1_rpn, opts.do_val);
 % test
-% train_file_suffix = '_train_vgg16_event3';
-% train_save_dir = 'train_vgg16_event3_res';
-% test_file_suffix = '_val_vgg16_event3';
-% test_save_dir = 'val_vgg16_event3_res';
-% %dataset.roidb_train         = cellfun(@(x, y) Faster_RCNN_Train.do_proposal_test(conf_proposal, model.stage1_rpn, x, y, train_file_suffix, train_save_dir), dataset.imdb_train, dataset.roidb_train, 'UniformOutput', false);
-% dataset.roidb_test       	= Faster_RCNN_Train.do_proposal_test(conf_proposal, model.stage1_rpn, dataset.imdb_test, dataset.roidb_test, test_file_suffix, test_save_dir);
+train_file_suffix = '_train_vgg16_event3';
+train_save_dir = 'train_vgg16_event3_res';
+test_file_suffix = '_val_vgg16_event3';
+test_save_dir = 'val_vgg16_event3_res';
+%dataset.roidb_train         = cellfun(@(x, y) Faster_RCNN_Train.do_proposal_test(conf_proposal, model.stage1_rpn, x, y, train_file_suffix, train_save_dir), dataset.imdb_train, dataset.roidb_train, 'UniformOutput', false);
+dataset.roidb_test       	= Faster_RCNN_Train.do_proposal_test(conf_proposal, model.stage1_rpn, dataset.imdb_test, dataset.roidb_test, test_file_suffix, test_save_dir);
 
 % liu@0816 masked --> not necessary currently
 % %%  stage one fast rcnn
