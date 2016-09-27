@@ -107,7 +107,7 @@ function save_model_path = proposal_train(conf, imdb_train, roidb_train, varargi
     catch
         [image_roidb_train, bbox_means, bbox_stds]...
                             = proposal_prepare_image_roidb(conf, opts.imdb_train, opts.roidb_train);
-        save(train_roi_name, 'image_roidb_train','bbox_means', 'bbox_stds');
+        save(train_roi_name, 'image_roidb_train','bbox_means', 'bbox_stds','-v7.3');
     end
     fprintf('Done.\n');
     
@@ -118,7 +118,7 @@ function save_model_path = proposal_train(conf, imdb_train, roidb_train, varargi
         catch
             [image_roidb_val]...
                                 = proposal_prepare_image_roidb(conf, opts.imdb_val, opts.roidb_val, bbox_means, bbox_stds);
-            save(test_roi_name, 'image_roidb_val');
+            save(test_roi_name, 'image_roidb_val','-v7.3');
         end
         fprintf('Done.\n');
 

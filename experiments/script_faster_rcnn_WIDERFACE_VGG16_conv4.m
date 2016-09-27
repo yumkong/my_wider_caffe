@@ -27,13 +27,14 @@ opts.do_val                 = true;
 %model                       = Model.VGG16_for_Faster_RCNN_WIDERFACE;
 model                       = Model.VGG16_for_Faster_RCNN_WIDERFACE_conv4;
 % cache base
-cache_base_proposal         = 'faster_rcnn_WIDERFACE_vgg_16layers_conv4';
+cache_base_proposal         = 'faster_rcnn_WIDERFACE_vgg_16layers_conv4_allevent';
 cache_base_fast_rcnn        = '';
 % train/test data
 dataset                     = [];
 use_flipped                 = false;  %true --> false
-dataset                     = Dataset.widerface_all(dataset, 'train', use_flipped);
-dataset                     = Dataset.widerface_all(dataset, 'test', false);
+event_num = -1; %3
+dataset                     = Dataset.widerface_all(dataset, 'train', use_flipped, event_num);
+dataset                     = Dataset.widerface_all(dataset, 'test', false, event_num);
 
 %0805 added, make sure imdb_train and roidb_train are of cell type
 if ~iscell(dataset.imdb_train)
