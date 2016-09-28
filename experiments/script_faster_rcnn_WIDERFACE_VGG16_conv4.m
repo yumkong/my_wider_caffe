@@ -23,18 +23,40 @@ active_caffe_mex(opts.gpu_id, opts.caffe_version);
 
 % do validation, or not 
 opts.do_val                 = true; 
-% model
+% ###1/5### CHANGE EACH TIME*** model config struct, need to change each time when using a new model
 %model                       = Model.VGG16_for_Faster_RCNN_WIDERFACE;
 model                       = Model.VGG16_for_Faster_RCNN_WIDERFACE_conv4;
-% cache base
+
+% ###2/5### CHANGE EACH TIME*** cache base name, usage: e.g.: a folder named 
+% [cache_base_proposal + '_stage1_rpn'] will be created in cache_data_root
+% to hold intermediate rpn data
 cache_base_proposal         = 'faster_rcnn_WIDERFACE_vgg_16layers_conv4_allevent';
 cache_base_fast_rcnn        = '';
-% train/test data
-dataset                     = [];
-use_flipped                 = false;  %true --> false
+
+% set cache folder for each stage
+model                       = Faster_RCNN_Train.set_cache_folder(cache_base_proposal, cache_base_fast_rcnn, model);
+
+% ###3/5### CHANGE EACH TIME*** use this to name intermediate data's mat files
+model_name_base = 'vgg16_conv4';  % ZF, vgg16_conv5
+
+% ###4/5### CHANGE EACH TIME*** : name of output map
+output_map_name = 'output_map_conv4';  % output_map_ZF, output_map_conv5
+
+% ###5/5### CHANGE EACH TIME*** how many training events are used: if N > 0, use the first N events of
+% images as training data, if N == -1, use all 61 events of images (the
+% whole widerface training set) as training data
 event_num = -1; %3
-dataset                     = Dataset.widerface_all(dataset, 'train', use_flipped, event_num);
-dataset                     = Dataset.widerface_all(dataset, 'test', false, event_num);
+% prepare train/test data
+dataset                     = [];
+% the root directory to hold any useful intermediate data during training process
+cache_data_root = 'cache_data';
+mkdir_if_missing(cache_data_root);
+% the dir holding intermediate data paticular
+cache_data_this_model_dir = fullfile(cache_data_root, model.stage1_rpn.cache_name);
+mkdir_if_missing(cache_data_this_model_dir);
+use_flipped                 = false;  %true --> false
+dataset                     = Dataset.widerface_all(dataset, 'train', use_flipped, event_num, cache_data_this_model_dir, model_name_base);
+dataset                     = Dataset.widerface_all(dataset, 'test', false, event_num, cache_data_this_model_dir, model_name_base);
 
 %0805 added, make sure imdb_train and roidb_train are of cell type
 if ~iscell(dataset.imdb_train)
@@ -44,18 +66,27 @@ if ~iscell(dataset.roidb_train)
     dataset.roidb_train = {dataset.roidb_train};
 end
 
-%% -------------------- TRAIN --------------------
-% conf
-%conf_proposal               = proposal_config('image_means', model.mean_image, 'feat_stride', model.feat_stride);
+% region proposal net(rpn) conf struct:
+% 'image_means': mean image path, 'feat_stride': feature stride of the last
+% conv layer (e.g.: 8 if use conv4 as last layer, 16 if use conv5 as last layer)
 conf_proposal               = proposal_config_widerface('image_means', model.mean_image, 'feat_stride', model.feat_stride);
 %conf_fast_rcnn              = fast_rcnn_config('image_means', model.mean_image);
-% set cache folder for each stage
-model                       = Faster_RCNN_Train.set_cache_folder(cache_base_proposal, cache_base_fast_rcnn, model);
-% generate anchors and pre-calculate output size of rpn network 
-[conf_proposal.anchors, conf_proposal.output_width_map, conf_proposal.output_height_map] ...
-                            = proposal_prepare_anchors(conf_proposal, model.stage1_rpn.cache_name, model.stage1_rpn.test_net_def_file);
 
-%%  stage one proposal
+% generate pre-calculate output size of rpn network 
+% liu@0927: output_map should be saved directly in cache_data_root, because
+% many different models may use the same output_map
+output_map_save_name = fullfile(cache_data_root, output_map_name);
+[conf_proposal.output_width_map, conf_proposal.output_height_map] = proposal_calc_output_size(conf, test_net_def_file, output_map_save_name);
+
+% generate anchors
+% liu@0927: 'anchors.mat' should be saved directly in cache_data_root, because
+% (almost) all models use the same anchor
+conf_proposal.anchors = proposal_generate_anchors(cache_data_root, 'scales',  2.^[-1:5]); %0820:2.^[3:5] -->  2.^[-1:5]
+%[conf_proposal.anchors, conf_proposal.output_width_map, conf_proposal.output_height_map] ...
+%                            = proposal_prepare_anchors(conf_proposal, model.stage1_rpn.cache_name, model.stage1_rpn.test_net_def_file);
+
+%%  TRAIN
+%% stage one proposal
 fprintf('\n***************\nstage one proposal \n***************\n');
 % train
 model.stage1_rpn            = Faster_RCNN_Train.do_proposal_train(conf_proposal, dataset, model.stage1_rpn, opts.do_val);
@@ -102,8 +133,8 @@ model.stage1_rpn            = Faster_RCNN_Train.do_proposal_train(conf_proposal,
 % Faster_RCNN_Train.gather_rpn_fast_rcnn_models(conf_proposal, conf_fast_rcnn, model, dataset);
 end
 
-function [anchors, output_width_map, output_height_map] = proposal_prepare_anchors(conf, cache_name, test_net_def_file)
-    output_map_save_name = fullfile('cache_data', 'output_map_conv4.mat');
-    [output_width_map, output_height_map] = proposal_calc_output_size(conf, test_net_def_file, output_map_save_name);
-    anchors = proposal_generate_anchors(cache_name, 'scales',  2.^[-1:5]);%0820:2.^[3:5] -->  2.^[-1:5]
-end
+% function [anchors, output_width_map, output_height_map] = proposal_prepare_anchors(conf, cache_name, test_net_def_file)
+%     output_map_save_name = fullfile('cache_data', 'output_map_conv4.mat');
+%     [output_width_map, output_height_map] = proposal_calc_output_size(conf, test_net_def_file, output_map_save_name);
+%     anchors = proposal_generate_anchors(cache_name, 'scales',  2.^[-1:5]);%0820:2.^[3:5] -->  2.^[-1:5]
+% end

@@ -23,9 +23,10 @@ function anchors = proposal_generate_anchors(cache_name, varargin)
 %%
     if ~opts.ignore_cache
         %anchor_cache_dir            = fullfile(pwd, 'output', 'rpn_cachedir', cache_name); 
-        anchor_cache_dir            = fullfile(pwd, 'cache_data', cache_name); 
-                                      mkdir_if_missing(anchor_cache_dir);
-        anchor_cache_file           = fullfile(anchor_cache_dir, 'anchors');
+%         anchor_cache_dir            = fullfile(pwd, 'cache_data', cache_name); 
+%                                       mkdir_if_missing(anchor_cache_dir);
+%         anchor_cache_file           = fullfile(anchor_cache_dir, 'anchors');
+        anchor_cache_file           = fullfile(cache_name, 'anchors');
     end
     try
         ld                      = load(anchor_cache_file);

@@ -1,4 +1,4 @@
-function [imdb, roidb] = imdb_from_widerface(root_dir, image_set, flip, cache_dir, event_num)
+function [imdb, roidb] = imdb_from_widerface(root_dir, image_set, flip, cache_dir, model_name_base, event_num)
 %function imdb_from_widerface(devkit, 'trainval', use_flip)
 
 switch image_set
@@ -11,8 +11,15 @@ switch image_set
         %cache_roidb = fullfile(cache_dir, 'train_roidb_ZF_e1-e3_raw.mat');  %roidb
         %cache_imdb = fullfile(cache_dir, 'train_imdb_vgg_conv4_e1-e3_raw.mat');  %imdb
         %cache_roidb = fullfile(cache_dir, 'train_roidb_vgg_conv4_e1-e3_raw.mat');  %roidb
-        cache_imdb = fullfile(cache_dir, 'train_imdb_vgg_conv4_all_raw.mat');  %imdb
-        cache_roidb = fullfile(cache_dir, 'train_roidb_vgg_conv4_all_raw.mat');  %roidb
+        %cache_imdb = fullfile(cache_dir, 'train_imdb_vgg_conv4_all_raw.mat');  %imdb
+        %cache_roidb = fullfile(cache_dir, 'train_roidb_vgg_conv4_all_raw.mat');  %roidb
+        if event_num == -1
+            data_num_str = 'all';
+        elseif event_num > 0
+            data_num_str = sprintf('e1-e%d', event_num);
+        end
+        cache_imdb = fullfile(cache_dir, sprintf('train_imdb_%s_%s_raw.mat',model_name_base, data_num_str));  %imdb
+        cache_roidb = fullfile(cache_dir, sprintf('train_roidb_%s_%s_raw.mat', model_name_base, data_num_str));  %roidb
         devpath = fullfile('WIDER_train','images');
         doc_dir = fullfile('wider_face_split','wider_face_train');
         name = 'WIDERFACE_train';
@@ -25,8 +32,15 @@ switch image_set
         %cache_roidb = fullfile(cache_dir, 'test_roidb_ZF_e1-e3_raw.mat');  %roidb
         %cache_imdb = fullfile(cache_dir, 'test_imdb_vgg_conv4_e1-e3_raw.mat');  %imdb
         %cache_roidb = fullfile(cache_dir, 'test_roidb_vgg_conv4_e1-e3_raw.mat');  %roidb
-        cache_imdb = fullfile(cache_dir, 'test_imdb_vgg_conv4_all_raw.mat');  %imdb
-        cache_roidb = fullfile(cache_dir, 'test_roidb_vgg_conv4_all_raw.mat');  %roidb
+        %cache_imdb = fullfile(cache_dir, 'test_imdb_vgg_conv4_all_raw.mat');  %imdb
+        %cache_roidb = fullfile(cache_dir, 'test_roidb_vgg_conv4_all_raw.mat');  %roidb
+        if event_num == -1
+            data_num_str = 'all';
+        elseif event_num > 0
+            data_num_str = sprintf('e1-e%d', event_num);
+        end
+        cache_imdb = fullfile(cache_dir, sprintf('test_imdb_%s_%s_raw.mat',model_name_base, data_num_str));  %imdb
+        cache_roidb = fullfile(cache_dir, sprintf('test_roidb_%s_%s_raw.mat', model_name_base, data_num_str));  %roidb
         devpath = fullfile('WIDER_val','images');
         doc_dir = fullfile('wider_face_split','wider_face_val');
         name = 'WIDERFACE_test';

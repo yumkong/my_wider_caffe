@@ -32,6 +32,7 @@ function [output_width_map, output_height_map] = proposal_calc_output_size(conf,
         for i = 1:length(input)
             fprintf('calulating input size %d / %d\n',i,conf.max_size);
             s = input(i);
+            %liu@0926 changed,because when s>= 1000, s x s is too big to feed to a net
             %im_blob = single(zeros(s, s, 3, 1));
             im_blob = single(zeros(s, 500, 3, 1));
             net_inputs = {im_blob};
@@ -42,6 +43,7 @@ function [output_width_map, output_height_map] = proposal_calc_output_size(conf,
 
             cls_score = caffe_net.blobs('proposal_cls_score').get_data();
             output_w(i) = size(cls_score, 1);
+            %liu@0926 changed, see above
             output_h(i) = size(cls_score, 1);
             %output_h(i) = size(cls_score, 2);
         end

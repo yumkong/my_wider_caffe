@@ -11,12 +11,12 @@ function save_model_path = proposal_train(conf, imdb_train, roidb_train, varargi
     ip.addRequired('conf',                                      @isstruct);
     ip.addRequired('imdb_train',                                @iscell);
     ip.addRequired('roidb_train',                               @iscell);
-    ip.addParamValue('do_val',              false,              @isscalar);
+    ip.addParamValue('do_val',              true,              @isscalar); %0927:false --> true
     ip.addParamValue('imdb_val',            struct(),           @isstruct);
     ip.addParamValue('roidb_val',           struct(),           @isstruct);
     
-    ip.addParamValue('val_iters',           100,                @isscalar); %0807: 500 --> 100
-    ip.addParamValue('val_interval',        2000,               @isscalar);
+    ip.addParamValue('val_iters',           200,                @isscalar); %0807: 500 --> 200 (~#image in val set)
+    ip.addParamValue('val_interval',        500,               @isscalar); %0927: 2000 --> 500
     ip.addParamValue('snapshot_interval',...
                                             1000,              @isscalar); %0822 10000 --> 1000
                                                                        
@@ -27,6 +27,9 @@ function save_model_path = proposal_train(conf, imdb_train, roidb_train, varargi
                                                         @isstr);
     ip.addParamValue('cache_name',          'Zeiler_conv5', ...
                                                         @isstr);
+    %0927 newly added cache root path
+    ip.addParamValue('cache_data_root',      'cache_data', ...
+                                                        @isstr);
     
     ip.parse(conf, imdb_train, roidb_train, varargin{:});
     opts = ip.Results;
@@ -34,7 +37,9 @@ function save_model_path = proposal_train(conf, imdb_train, roidb_train, varargi
 %% try to find trained model
     imdbs_name = cell2mat(cellfun(@(x) x.name, imdb_train, 'UniformOutput', false));
     %cache_dir = fullfile(pwd, 'output', 'rpn_cachedir', opts.cache_name, imdbs_name);
-    cache_dir = fullfile(pwd, 'cache_data', opts.cache_name, imdbs_name);
+    %cache_dir = fullfile(pwd, 'cache_data', opts.cache_name, imdbs_name);
+    %0927 changed: to make all path non-mannual, but passed from outside
+    cache_dir = fullfile(pwd, opts.cache_data_root, opts.cache_name, imdbs_name);
     mkdir_if_missing(cache_dir);
     save_model_path = fullfile(cache_dir, 'final');
     if exist(save_model_path, 'file')
@@ -154,7 +159,17 @@ function save_model_path = proposal_train(conf, imdb_train, roidb_train, varargi
 %                         'conv3_2', 'conv3_1'};
 %     caffe_blob_names  = caffe_blob_names(end:-1:1);
 %     mat_blob_indices = 1:24;
-    while (iter_ < max_iter)
+
+    % 0927 added to record plot info
+    modelFigPath = fullfile(cache_dir, 'net-train.pdf');  % plot save path
+    tmp_struct = struct('err_fg', [], 'err_bg', [], 'loss_cls', [], 'loss_bbox', []);
+    history_rec = struct('train',tmp_struct,'val',tmp_struct, 'num', 0);
+% liu@0927: now starts from 1, since the above 'check_gpu_memory' has already cost iter0 
+    % liu@0927: change from '<' to '<=' to make sure all snapshot and
+    % validation can be done within while loop
+    while (iter_ <= max_iter)
+        % begin time counting
+        start_time = tic;
         
         caffe_solver.net.set_phase('train');
         %fprintf('Network param sum of absolute difference for iteration %d: \n', iter_);
@@ -178,7 +193,8 @@ function save_model_path = proposal_train(conf, imdb_train, roidb_train, varargi
         % one iter SGD update
         caffe_solver.net.set_input_data(net_inputs);
         caffe_solver.step(1);
-        
+        %end time counting
+        cost_time = toc(start_time);
 %         fprintf('\n');
 %         for kk = 1:length(caffe_blob_names)
 %            blob_der_compare(caffe_solver.net, caffe_blob_names{kk}, der_cell{mat_blob_indices(2*kk-1)}, der_cell{mat_blob_indices(2*kk)}); 
@@ -188,8 +204,8 @@ function save_model_path = proposal_train(conf, imdb_train, roidb_train, varargi
         rst = caffe_solver.net.get_output();
         rst = check_error(rst, caffe_solver);
         
-        format long
-        fprintf('Iter %d, Image %d: ', iter_, sub_db_inds);
+        %format long
+        fprintf('Iter %d, Image %d: %.1f Hz, ', iter_, sub_db_inds, 1/cost_time);
         for kkk = 1:length(rst)
             fprintf('%s = %.4f, ',rst(kkk).blob_name, rst(kkk).data); 
         end
@@ -199,19 +215,20 @@ function save_model_path = proposal_train(conf, imdb_train, roidb_train, varargi
         % check_loss(rst, caffe_solver, net_inputs);
 
         % do valdiation per val_interval iterations
-        %if ~mod(iter_, opts.val_interval) 
-        if ~mod(iter_+1, opts.val_interval) 
+        if ~mod(iter_, opts.val_interval) 
             if opts.do_val
                 val_results = do_validation(conf, caffe_solver, proposal_generate_minibatch_fun, image_roidb_val, shuffled_inds_val);
             end
+            % 0927 changed: showstate + plot
+            %show_state(iter_, train_results, val_results);
+            history_rec = show_state_and_plot(iter_, train_results, val_results, history_rec, modelFigPath);
             
-            show_state(iter_, train_results, val_results);
             train_results = [];
             diary; diary; % flush diary
         end
         
         % snapshot
-        if ~mod(iter_+1, opts.snapshot_interval)
+        if ~mod(iter_, opts.snapshot_interval)
             snapshot(conf, caffe_solver, bbox_means, bbox_stds, cache_dir, sprintf('iter_%d', iter_));
         end
         
@@ -219,11 +236,13 @@ function save_model_path = proposal_train(conf, imdb_train, roidb_train, varargi
     end
     
     % final validation
-    if opts.do_val
-        do_validation(conf, caffe_solver, proposal_generate_minibatch_fun, image_roidb_val, shuffled_inds_val);
-    end
+    % liu@0927 commented, because now all validation can be done during while loop
+    %if opts.do_val
+    %    do_validation(conf, caffe_solver, proposal_generate_minibatch_fun, image_roidb_val, shuffled_inds_val);
+    %end
     % final snapshot
-    snapshot(conf, caffe_solver, bbox_means, bbox_stds, cache_dir, sprintf('iter_%d', iter_));
+    % liu@0927 commented, because now all snapshot can be done during while loop
+    %snapshot(conf, caffe_solver, bbox_means, bbox_stds, cache_dir, sprintf('iter_%d', iter_));
     save_model_path = snapshot(conf, caffe_solver, bbox_means, bbox_stds, cache_dir, 'final');
 
     diary off;
@@ -233,6 +252,7 @@ function save_model_path = proposal_train(conf, imdb_train, roidb_train, varargi
 end
 
 function val_results = do_validation(conf, caffe_solver, proposal_generate_minibatch_fun, image_roidb_val, shuffled_inds_val)
+    % before each validation clear the history results
     val_results = [];
 
     caffe_solver.net.set_phase('test');
@@ -294,7 +314,7 @@ function rst = check_error(rst, caffe_solver)
     
     accurate_fg = (cls_score(:, :, 2) > cls_score(:, :, 1)) & (labels == 1);
     accurate_bg = (cls_score(:, :, 2) <= cls_score(:, :, 1)) & (labels == 0);
-    accurate = accurate_fg | accurate_bg;
+    %accurate = accurate_fg | accurate_bg;
     accuracy_fg = sum(accurate_fg(:) .* labels_weights(:)) / (sum(labels_weights(labels == 1)) + eps);
     accuracy_bg = sum(accurate_bg(:) .* labels_weights(:)) / (sum(labels_weights(labels == 0)) + eps);
     
@@ -364,7 +384,9 @@ function model_path = snapshot(conf, caffe_solver, bbox_means, bbox_stds, cache_
     caffe_solver.net.set_params_data(bbox_pred_layer_name, 2, biase_back);
 end
 
-function show_state(iter, train_results, val_results)
+%function show_state(iter, train_results, val_results)
+function history_rec = show_state_and_plot(iter, train_results, val_results, history_rec, modelFigPath)
+    % --------- begin previously show_state part ------------
     fprintf('\n------------------------- Iteration %d -------------------------\n', iter);
     fprintf('Training : err_fg %.3g, err_bg %.3g, loss (cls %.3g + reg %.3g)\n', ...
         1 - mean(train_results.accuracy_fg.data), 1 - mean(train_results.accuracy_bg.data), ...
@@ -376,6 +398,42 @@ function show_state(iter, train_results, val_results)
             mean(val_results.loss_cls.data), ...
             mean(val_results.loss_bbox.data));
     end
+    % --------- end previously show_state part ------------
+    % ========= newly added plot part =====================
+    history_rec.train.err_fg = [history_rec.train.err_fg; 1 - mean(train_results.accuracy_fg.data)];
+    history_rec.train.err_bg = [history_rec.train.err_bg; 1 - mean(train_results.accuracy_bg.data)];
+    history_rec.train.loss_cls = [history_rec.train.loss_cls; mean(train_results.loss_cls.data)];
+    history_rec.train.loss_bbox = [history_rec.train.loss_bbox; mean(train_results.loss_bbox.data)];
+    history_rec.val.err_fg = [history_rec.val.err_fg; 1 - mean(val_results.accuracy_fg.data)];
+    history_rec.val.err_bg = [history_rec.val.err_bg; 1 - mean(val_results.accuracy_bg.data)];
+    history_rec.val.loss_cls = [history_rec.val.loss_cls; mean(val_results.loss_cls.data)];
+    history_rec.val.loss_bbox = [history_rec.val.loss_bbox; mean(val_results.loss_bbox.data)];
+    history_rec.num = history_rec.num + 1;
+    % draw it
+    figure(1) ; clf ;
+    plots = {'err_fg', 'err_bg', 'loss_cls', 'loss_bbox'};
+    for p = plots
+      c_p = char(p) ;
+      values = zeros(0, history_rec.num) ;
+      leg = {} ;
+      for f = {'train', 'val'}
+        c_f = char(f) ;
+        if isfield(history_rec.(c_f), c_p)
+          %tmp = [history_rec.(c_f).(c_p)] ;
+          %values(end+1,:) = tmp(1,:)' ;
+          values(end+1,:) = [history_rec.(c_f).(c_p)]';
+          leg{end+1} = c_f;
+        end
+      end
+      subplot(1,numel(plots),find(strcmp(c_p, plots))) ;
+      plot(1:history_rec.num, values','o-') ;
+      xlabel('epoch') ;
+      title(c_p) ;
+      legend(leg{:}) ;
+      grid on ;
+    end
+    drawnow ;
+    print(1, modelFigPath, '-dpdf') ;
 end
 
 function check_loss(rst, caffe_solver, input_blobs)
